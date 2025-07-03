@@ -1,5 +1,6 @@
 import os
-from re import LOCALE
+import re
+from dataclasses import dataclass
 from typing import Dict, List, Tuple
 import m3u8
 from m3u8.model import M3U8
@@ -7,6 +8,13 @@ from m3u8.model import M3U8
 from .config import Config
 from .channel_group import ChannelGroup
 from .connect_checker import ConnectChecker
+
+
+@dataclass
+class ChannelInfo:
+    group: str
+    name: str
+    uri: str
 
 
 class Main:
@@ -102,20 +110,15 @@ class Main:
         self.__consolePrint("格式化m3u文件已生成")
         self.__consolePrint("="*20)
 
-    def __groupChannelsByM3u8Obj(self, m3u8Obj: M3U8, channelGroups: Dict[ChannelGroup, List]) -> None:
-        """对M3U8对象中的频道信息进行分组
-        m3u8Obj: M3U8对象
-        channelGroups: 用于存放分组的字典容器
-        """
-        for segment in m3u8Obj.segments:
-            uri = segment.uri
-            title = segment.title
-            self.__groupChannel(title, uri, channelGroups)
+    def __groupChannelsByM3u8Obj(self, channels: list, channelGroups: Dict[ChannelGroup, List]) -> None:
+        """对频道信息列表进行分组"""
+        for channel in channels:
+            self.__groupChannel(channel.name, channel.uri, channelGroups)
 
     def __formatM3uFile(self, filePath: str) -> None:
         """格式化m3u文件"""
         self.__consolePrint("开始格式化{}".format(filePath))
-        m3u8Obj = self.__getM3U8FromM3uFile(filePath)
+        channels = self.__getChannelsFromM3uFile(filePath)
         channelGroups = {
             ChannelGroup.CCTV: [],
             ChannelGroup.LOCAL: [],
@@ -124,25 +127,46 @@ class Main:
             ChannelGroup.TAI_WAN: [],
             ChannelGroup.OTHER: [],
         }
-        self.__groupChannelsByM3u8Obj(m3u8Obj, channelGroups)
+        self.__groupChannelsByM3u8Obj(channels, channelGroups)
         fileName = os.path.basename(filePath)
         formatedFilePath = self.__getFormatedFilePath(fileName)
         self.__formatGroupedChannels(channelGroups, formatedFilePath)
 
-    def __getM3U8FromM3uFile(self, filePath: str) -> M3U8:
-        """从指定m3u文件获取M3U8对象
-        filePath: 指定的m3u文件路径
-        """
+    def __getChannelsFromM3uFile(self, filePath: str) -> list:
+        """自定义解析m3u文件，支持group-title及tvg等属性，返回ChannelInfo列表"""
+        channels = []
+        group = None
+        name = None
         with open(file=filePath, encoding="UTF-8", mode="r") as fopen:
-            contents = fopen.read()
-        m3u8Obj = m3u8.loads(contents)
-        return m3u8Obj
+            lines = [line.strip() for line in fopen if line.strip()]
+        i = 0
+        while i < len(lines):
+            line = lines[i]
+            if line.startswith('#EXTINF'):
+                # 解析 group-title 和频道名，兼容多属性
+                m = re.match(r'#EXTINF:-?1\s+([^,]*),(.+)', line)
+                if m:
+                    attrs = m.group(1)
+                    name = m.group(2).strip()
+                    # 提取 group-title 属性
+                    group_match = re.search(r'group-title="([^"]*)"', attrs)
+                    group = group_match.group(1) if group_match else ''
+                else:
+                    group = ''
+                    name = line.split(',', 1)[-1].strip()
+                # 下一个非注释行为uri
+                j = i + 1
+                while j < len(lines) and lines[j].startswith('#'):
+                    j += 1
+                if j < len(lines):
+                    uri = lines[j]
+                    channels.append(ChannelInfo(group, name, uri))
+                    i = j
+            i += 1
+        return channels
 
-    def __mergeAndFormatM3U8Objs(self, M3u8Objs: Tuple[M3U8], distinyPath: str) -> None:
-        """对给定的多个M3U8对象进行合并并且格式化后保存到目标路径
-        M3u8Objs: 多个m3u8对象
-        distinyPath: 格式化后保存的目标路径
-        """
+    def __mergeAndFormatM3U8Objs(self, channelsList: Tuple[list], distinyPath: str) -> None:
+        """对给定的多个频道列表进行合并并且格式化后保存到目标路径"""
         channelGroups = {
             ChannelGroup.CCTV: [],
             ChannelGroup.LOCAL: [],
@@ -152,8 +176,8 @@ class Main:
             ChannelGroup.OTHER: [],
         }
         print("对多个m3u文件内容进行合并")
-        for m3u8Obj in M3u8Objs:
-            self.__groupChannelsByM3u8Obj(m3u8Obj, channelGroups)
+        for channels in channelsList:
+            self.__groupChannelsByM3u8Obj(channels, channelGroups)
         self.__formatGroupedChannels(channelGroups, distinyPath)
 
     def __consolePrint(self, msg: str) -> None:
@@ -173,7 +197,7 @@ class Main:
 
     def allInOne(self):
         """扫描工作目录下的所有m3u和m3u8文件，汇总后创建all_in_one_formated.m3u"""
-        m3u8Objs = []
+        channelsList = []
         self.__consolePrint("="*20)
         self.__consolePrint("读取工作目录下的m3u文件")
         for dir in os.listdir():
@@ -182,11 +206,11 @@ class Main:
                 if self.__isOriginalM3uFile(fileName):
                     sysConfig = Config.getInstance()
                     filePath = sysConfig.getCurrentUserWorkDirPath()+sysConfig.getDirSep()+fileName
-                    m3u8Objs.append(self.__getM3U8FromM3uFile(filePath))
-        if m3u8Objs:
+                    channelsList.append(self.__getChannelsFromM3uFile(filePath))
+        if channelsList:
             distinyPath = sysConfig.getCurrentUserWorkDirPath()+sysConfig.getDirSep() + \
                 "all_in_one_formated.m3u"
-            self.__mergeAndFormatM3U8Objs(m3u8Objs, distinyPath)
+            self.__mergeAndFormatM3U8Objs(channelsList, distinyPath)
 
     def showHelpInfo(self):
         helpFilePath = Config.getInstance().getHelpFilePath()
