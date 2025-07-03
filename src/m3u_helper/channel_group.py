@@ -1,23 +1,23 @@
 import enum
 class ChannelGroup(enum.Enum):
     CCTV = 1
-    LOCAL = 2 #地方台
-    HK = 3 #香港
-    TAI_WAN = 4 #台湾
-    AM = 5 #澳门
+    LOCAL = 2 #省级频道
+    HKMOTW = 3 #港澳台频道
+    WEI_SHI = 7 #卫视频道
+    CITY = 8 #市级频道
     OTHER = 6
     def getName(self):
         if self is ChannelGroup.CCTV:
-            return "中央台"
+            return "央视频道"
         elif self is ChannelGroup.LOCAL:
-            return "地方台"
-        elif self is ChannelGroup.HK:
-            return "香港台"
-        elif self is ChannelGroup.TAI_WAN:
-            return "台湾台"
-        elif self is ChannelGroup.AM:
-            return "澳门台"
+            return "省级频道"
+        elif self is ChannelGroup.HKMOTW:
+            return "港澳台频道"
+        elif self is ChannelGroup.WEI_SHI:
+            return "卫视频道"
+        elif self is ChannelGroup.CITY:
+            return "市级频道"
         elif self is ChannelGroup.OTHER:
-            return "其它台"
+            return "其它频道"
         else:
             return ""
