@@ -8,7 +8,7 @@ class ConnectChecker:
     @classmethod
     def __check(cls, uri: str):
         try:
-            r = requests.get(uri, timeout=1, stream=True)
+            r = requests.get(uri, timeout=5, stream=True)
         except requests.exceptions.Timeout:
             return False
         except Exception:
