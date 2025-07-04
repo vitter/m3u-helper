@@ -2,23 +2,23 @@
 
 ## 目录
 
-- [**项目地址**](https://github.com/icexmoon/m3u-helper#%E9%A1%B9%E7%9B%AE%E5%9C%B0%E5%9D%80)
-- [**用途**](https://github.com/icexmoon/m3u-helper#%E7%94%A8%E9%80%94)
-- [**注意事项**](https://github.com/icexmoon/m3u-helper#%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9)
-- [**安装**](https://github.com/icexmoon/m3u-helper#%E5%AE%89%E8%A3%85)
-- [**更新**](https://github.com/icexmoon/m3u-helper#%E6%9B%B4%E6%96%B0)
-- [**功能**](https://github.com/icexmoon/m3u-helper#%E5%8A%9F%E8%83%BD)
-  - [**输出帮助信息**](https://github.com/icexmoon/m3u-helper#%E8%BE%93%E5%87%BA%E5%B8%AE%E5%8A%A9%E4%BF%A1%E6%81%AF)
-  - [**格式化m3u文件**](https://github.com/icexmoon/m3u-helper#%E6%A0%BC%E5%BC%8F%E5%8C%96m3u%E6%96%87%E4%BB%B6)
-  - [**all-in-one**](https://github.com/icexmoon/m3u-helper#all-in-one)
-  - [**可选参数**](https://github.com/icexmoon/m3u-helper#%E5%8F%AF%E9%80%89%E5%8F%82%E6%95%B0)
-- [**更新日志**](https://github.com/icexmoon/m3u-helper#%E6%9B%B4%E6%96%B0%E6%97%A5%E5%BF%97)
+- [**项目地址**](https://github.com/vitter/m3u-helper#%E9%A1%B9%E7%9B%AE%E5%9C%B0%E5%9D%80)
+- [**用途**](https://github.com/vitter/m3u-helper#%E7%94%A8%E9%80%94)
+- [**注意事项**](https://github.com/vitter/m3u-helper#%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9)
+- [**安装**](https://github.com/vitter/m3u-helper#%E5%AE%89%E8%A3%85)
+- [**更新**](https://github.com/vitter/m3u-helper#%E6%9B%B4%E6%96%B0)
+- [**功能**](https://github.com/vitter/m3u-helper#%E5%8A%9F%E8%83%BD)
+  - [**输出帮助信息**](https://github.com/vitter/m3u-helper#%E8%BE%93%E5%87%BA%E5%B8%AE%E5%8A%A9%E4%BF%A1%E6%81%AF)
+  - [**格式化m3u文件**](https://github.com/vitter/m3u-helper#%E6%A0%BC%E5%BC%8F%E5%8C%96m3u%E6%96%87%E4%BB%B6)
+  - [**all-in-one**](https://github.com/vitter/m3u-helper#all-in-one)
+  - [**可选参数**](https://github.com/vitter/m3u-helper#%E5%8F%AF%E9%80%89%E5%8F%82%E6%95%B0)
+- [**更新日志**](https://github.com/vitter/m3u-helper#%E6%9B%B4%E6%96%B0%E6%97%A5%E5%BF%97)
 
 ## 项目地址
 
 pypi：<https://pypi.org/project/m3u-helper-icexmoon/>
 
-Github：<https://github.com/icexmoon/m3u-helper>
+Github：<https://github.com/vitter/m3u-helper>
 
 个人博客：<https://blog.icexmoon.xyz/archives/189.html>
 
@@ -28,7 +28,7 @@ Github：<https://github.com/icexmoon/m3u-helper>
 
 ## 注意事项
 
-- 对电视频道有效性的验证是通过调用`requests`模块的`get`请求实现的，所有在0.1秒内连接，并且http状态不是200的url被认为是有效的电视频道，否则视为无效。
+- 对电视频道有效性的验证是通过调用`requests`模块的`get`请求实现的，所有在5秒内连接，并且http状态不是200的url被认为是有效的电视频道，否则视为无效。
 
 - 有效性验证使用`futures`模块实现多线程，目前线程池数目设置为10。
 
