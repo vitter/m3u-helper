@@ -13,8 +13,7 @@ class Config:
 
     def getProjectHomePath(self):
         """获取项目目录"""
-        part = __file__.rpartition('\\')
-        return part[0]
+        return os.path.dirname(os.path.abspath(__file__))
 
     def getCurrentUserWorkDirPath(self):
         """获取当前用户的工作目录"""
